@@ -1,5 +1,6 @@
 use crate::schema::authentication;
 use chrono::{DateTime, Utc};
+use diesel::{Queryable, Selectable};
 
 #[derive(Queryable, Selectable, Debug, Clone)]
 #[diesel(table_name = authentication)]
@@ -7,7 +8,7 @@ use chrono::{DateTime, Utc};
 pub struct Authentication {
     pub username: String,
     pub created: DateTime<Utc>,
-    pub privilege: String;
+    pub privilege: String,
     pub password: String,  // PHC Argon2 hash
 }
 

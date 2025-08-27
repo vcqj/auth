@@ -2,9 +2,9 @@ use actix_web::{test, web, App};
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use auth_api::lib::{login_handler, AppState, AuthRepo, LoginRequest};
-use auth_api::models::Authentication;
-use auth_api::security::{hash_password};
+use auth::{login_handler, AppState, AuthRepo, LoginRequest};
+use auth::models::Authentication;
+use auth::security::hash_password;
 
 struct MockRepo {
     // username -> (role, phc_hash)
@@ -18,7 +18,7 @@ impl AuthRepo for MockRepo {
             Ok(Some(Authentication {
                 username: username.to_string(),
                 created: chrono::Utc::now(),
-                privalige: role.clone(),
+                privilege: role.clone(),
                 password: phc.clone(),
             }))
         } else {

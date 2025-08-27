@@ -1,5 +1,10 @@
+pub mod models;
+pub mod security;
+pub mod schema;
+pub mod db;
+
 use actix_web::{web, HttpResponse, Responder};
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 use std::sync::Arc;
 
 use crate::models::Authentication;
@@ -10,7 +15,7 @@ pub struct AppState {
     pub repo: Arc<dyn AuthRepo>,
 }
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct LoginRequest {
     pub username: String,
     pub password: String,
@@ -49,7 +54,7 @@ pub async fn login_handler(
     match verify_password(&body.password, &user.password) {
         Ok(true) => HttpResponse::Ok().json(serde_json::json!({
             "username": user.username,
-            "role": user.privalige
+            "role": user.privilege
         })),
         Ok(false) => HttpResponse::Unauthorized().json(serde_json::json!({
             "error": "invalid credentials"

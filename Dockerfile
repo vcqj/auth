@@ -1,7 +1,6 @@
 # ------- builder stage -------
-FROM rust:1.79-slim AS builder
+FROM rust:1.80-slim AS builder
 
-# System deps to compile Diesel (postgres feature) and OpenSSL
 RUN apt-get update && apt-get install -y --no-install-recommends \
       pkg-config libssl-dev libpq-dev build-essential ca-certificates \
     && rm -rf /var/lib/apt/lists/*
@@ -9,8 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # Cache deps first
-COPY Cargo.toml Cargo.lock ./
-# Create a dummy main to warm the cache
+COPY Cargo.toml ./
 RUN mkdir -p src && echo "fn main(){}" > src/main.rs
 RUN cargo build --release || true
 
@@ -21,7 +19,6 @@ RUN cargo build --release
 # ------- runtime stage -------
 FROM debian:bookworm-slim AS runtime
 
-# libpq is required at runtime for Diesel(Postgres)
 RUN apt-get update && apt-get install -y --no-install-recommends \
       libpq5 ca-certificates \
     && rm -rf /var/lib/apt/lists/* \

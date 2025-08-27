@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Rust tests (stable • ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Install Rust toolchain
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy,rustfmt
+
+      # Speed up builds between runs
+      - uses: Swatinem/rust-cache@v2
+
+      # Lint & format (fail CI if not clean)
+      - name: rustfmt
+        run: cargo fmt --all -- --check
+      - name: clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      # Run tests
+      - name: cargo test
+        env:
+          # Make sure tests never hit real services
+          TWILIO_ACCOUNT_SID: dummy
+          TWILIO_AUTH_TOKEN: dummy
+          NEON_DB_PASSWORD: dummy
+        run: cargo test --all --locked --verbose
+

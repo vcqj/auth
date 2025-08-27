@@ -1,0 +1,45 @@
+name: PR Tests
+
+on:
+  pull_request:
+    branches: [ "master" ]
+    types: [ opened, synchronize, reopened, ready_for_review ]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-${{ github.event.pull_request.head.sha }}
+  cancel-in-progress: true
+
+jobs:
+  pr-tests:
+    name: PR tests
+    if: ${{ !github.event.pull_request.draft }} # skip draft PRs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system deps (Diesel/Postgres headers)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libpq-dev
+
+      - name: Setup Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          # Pin if you need >=1.82 for zerovec, etc. Example:
+          # toolchain: 1.83.0
+          components: rustfmt, clippy
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build
+        run: cargo build --locked --all-targets
+
+      - name: Run tests
+        run: cargo test --locked --all-features --all-targets --verbose
+

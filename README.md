@@ -1,2 +1,2 @@
-# auth
+# Auth
 Authentication service
